@@ -13,7 +13,8 @@ However, if the bot does not automatically post a link and you would like it to,
 ### Comments
 As stated above, tag the bot in a reply to a comment to get a link for any coordinates found.
 
-I also plan on adding the ability to provide your own coordinates in your call to the bot, however this is not implemented in v1.0.
+~~I also plan on adding the ability to provide your own coordinates in your call to the bot, however this is not implemented in v1.0.~~
+This feature has been added! Just include your coordinates in your comment to get the links!
 
 ## Contact Me
 You can contact me by sending me a PM ([u/TheTowerBay](https://www.reddit.com/user/TheTowerBay)) or though GitHub (however, please note that I am not as active here).
