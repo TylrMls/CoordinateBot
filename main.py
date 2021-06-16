@@ -120,14 +120,13 @@ def get_coords(message):
 get_subreddits()
 subs = reddit.subreddit(subreddits)
 post_stream = subs.stream.submissions(pause_after=-1)
-mention_stream = praw.models.util.stream_generator(reddit.inbox.mentions, pause_after=-1)
+mention_stream = praw.models.util.stream_generator(reddit.inbox.mentions, pause_after=-1, skip_existing=True)
 pm_stream = praw.models.util.stream_generator(reddit.inbox.messages, pause_after=-1, skip_existing=True)
 while True:
     for post in post_stream:
         if post is None:
             break
         if not post.saved:
-            print(type(post))
             print("Post ID: {id}, {title}".format(id=post, title=post.title))
             msg = post.title.split() + post.selftext.split()
             result = get_coords(msg)
@@ -138,21 +137,20 @@ while True:
     for comment in mention_stream:
         if comment is None:
             break
-        if not comment.saved:
-            print("Comment ID: {id}, {message}".format(id=comment, message=comment.body))
-            parent = comment.parent()
-            msg = comment.body.split()
+        print("Comment ID: {id}, {message}".format(id=comment, message=comment.body))
+        parent = comment.parent()
+        msg = comment.body.split()
+        result = get_coords(msg)
+        comment.save()
+        if result is not "":
+            comment.reply(result)
+        elif type(parent) is praw.reddit.models.Submission:
+            pass
+        else:
+            msg = parent.body.split()
             result = get_coords(msg)
-            comment.save()
             if result is not "":
                 comment.reply(result)
-            elif type(parent) is praw.reddit.models.Submission:
-                pass
-            else:
-                msg = parent.body.split()
-                result = get_coords(msg)
-                if result is not "":
-                    comment.reply(result)
 
     for pm in pm_stream:
         if pm is None:
