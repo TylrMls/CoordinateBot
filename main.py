@@ -128,12 +128,13 @@ while True:
     for post in post_stream:
         if post is None:
             break
-        print("Post ID: {id}, {title}".format(id=post, title=post.title))
-        msg = post.title.split() + post.selftext.split()
-        result = get_coords(msg)
-        post.save()
-        if result is not "":
-            post.reply(result)
+        if post.author.id not in users_optout:
+            print("Post ID: {id}, {title}".format(id=post, title=post.title))
+            msg = post.title.split() + post.selftext.split()
+            result = get_coords(msg)
+            post.save()
+            if result is not "":
+                post.reply(result)
 
     for comment in mention_stream:
         if comment is None:
