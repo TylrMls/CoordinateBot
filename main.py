@@ -119,20 +119,21 @@ def get_coords(message):
 
 get_subreddits()
 subs = reddit.subreddit(subreddits)
-post_stream = subs.stream.submissions(pause_after=-1)
+# I really didn't want to do this,
+# but skip_existing is required in order to deploy the bot on subreddits with lots of content
+post_stream = subs.stream.submissions(pause_after=-1, skip_existing=True)
 mention_stream = praw.models.util.stream_generator(reddit.inbox.mentions, pause_after=-1, skip_existing=True)
 pm_stream = praw.models.util.stream_generator(reddit.inbox.messages, pause_after=-1, skip_existing=True)
 while True:
     for post in post_stream:
         if post is None:
             break
-        if not post.saved:
-            print("Post ID: {id}, {title}".format(id=post, title=post.title))
-            msg = post.title.split() + post.selftext.split()
-            result = get_coords(msg)
-            post.save()
-            if result is not "":
-                post.reply(result)
+        print("Post ID: {id}, {title}".format(id=post, title=post.title))
+        msg = post.title.split() + post.selftext.split()
+        result = get_coords(msg)
+        post.save()
+        if result is not "":
+            post.reply(result)
 
     for comment in mention_stream:
         if comment is None:
