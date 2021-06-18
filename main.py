@@ -72,8 +72,12 @@ def get_coords(message):
         if index is len(message) - 1:
             # Since there are no more words after this one a longitude value is impossible.
             break
-        testLat = re.sub("[^NESW^0-9.-]", "", word)
-        testLong = re.sub("[^NESW^0-9.-]", "", message[index + 1])
+        try:
+            testLat = re.sub("[^NESW^0-9.-]", "", word)
+            testLong = re.sub("[^NESW^0-9.-]", "", message[index + 1])
+        except IndexError:
+            print("Error with testLat or testLong")
+            break
         try:
             if testLat is "":
                 raise ValueError
