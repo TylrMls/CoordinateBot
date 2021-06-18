@@ -75,6 +75,41 @@ def get_coords(message):
         try:
             testLat = re.sub("[^NESW^0-9.-]", "", word)
             testLong = re.sub("[^NESW^0-9.-]", "", message[index + 1])
+            # Adding the fix for multiple decimal points introduced a problem where any word before a possible
+            # coordinate was found to be 0.0, a valid latitude or longitude value.
+            if re.sub("[^0-9]", "", testLat) != "":
+                testLatDecimals = 0
+                for indexLat, char in enumerate(testLat):
+                    if char == "." and testLatDecimals < 1:
+                        try:
+                            nextChar = testLat[indexLat + 1]
+                        except IndexError:
+                            # Decimal point is last character. Add a 0 so the rest of the function doesnt break!
+                            testLat = testLat + "0"
+                            break
+                        testLatDecimals += 1
+                    elif char == ".":
+                        testLat = testLat[:indexLat] + testLat[indexLat+1:]
+                        testLatDecimals += 1
+                    else:
+                        # Character is not a decimal point. Ignore.
+                        pass
+                testLongDecimals = 0
+                for indexLong, char in enumerate(testLong):
+                    if char == "." and testLongDecimals < 1:
+                        try:
+                            nextChar = testLong[indexLong + 1]
+                        except IndexError:
+                            # Decimal point is last character. Add a 0 so the rest of the function doesnt break!
+                            testLong = testLong + "0"
+                            break
+                        testLongDecimals += 1
+                    elif char == ".":
+                        testLong = testLong[:indexLong] + testLong[indexLong+1:]
+                    else:
+                        # Character is not a decimal point. Ignore.
+                        pass
+
         except IndexError:
             print("Error with testLat or testLong")
             break
@@ -107,7 +142,7 @@ def get_coords(message):
         links = ""
         for index, coordinate in enumerate(coordinates):
             link = get_link(coordinate[0], coordinate[1])
-            links = links + "[Coordinate {index}]({link})\n".format(index=index + 1, link=link)
+            links = links + "[Coordinate {index}]({link})  \n".format(index=index + 1, link=link)
         replyText = ("I found some coordinates! Here are some links for them!  \n  \n"
                      "{links}  \n"
                      "---\n"
