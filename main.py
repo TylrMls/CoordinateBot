@@ -77,7 +77,7 @@ def get_coords(message):
             testLong = re.sub("[^NESW^0-9.-]", "", message[index + 1])
             # Adding the fix for multiple decimal points introduced a problem where any word before a possible
             # coordinate was found to be 0.0, a valid latitude or longitude value.
-            if re.sub("[^0-9]", "", testLat) != "":
+            if re.sub("[^0-9]", "", testLat) != "" and re.sub("[^0-9]", "", testLong) != "":
                 testLatDecimals = 0
                 for indexLat, char in enumerate(testLat):
                     if char == "." and testLatDecimals < 1:
