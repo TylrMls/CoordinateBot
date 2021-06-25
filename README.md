@@ -2,7 +2,7 @@
 A bot that finds possible coordinates in a message or post title and creates a clickable link!
 
 ## How it works
-The bot uses the [Python Reddit API Wrapper (PRAW)](https://praw.readthedocs.io/en/latest/) to get posts in specific subreddits. It then splits the post title (and post body if applicable) and removes any non-numeric characters, after which it checks for any possible coordinates and upon finding a pair of coordinates creates a Google Maps link.
+The bot uses the [Python Reddit API Wrapper (PRAW)](https://praw.readthedocs.io/en/latest/) to get posts in specific subreddits. It then checks the post title (and body if applicable) for any possible coordinates, and replies with links to each location.
 
 ## How to use
 ### Posts
