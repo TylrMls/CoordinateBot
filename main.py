@@ -117,9 +117,16 @@ while True:
                 print("Parent ID: {id}, {title}".format(id=parent, title=parent.title))
                 msg = parent.title.split() + ["/"] + parent.selftext.split()
                 coordinates = coordhandler.get_coordinates(msg)
-                parent.save()
+                comment.save()
                 if len(coordinates) != 0:
-                    parent.reply(get_response(coordinates))
+                    comment.reply(get_response(coordinates))
+            elif type(parent) is praw.reddit.models.Comment and parent is not None:
+                print("Parent ID: {id}, {body}".format(id=parent, body=parent.body))
+                msg = parent.body.split()
+                coordinates = coordhandler.get_coordinates(msg)
+                comment.save()
+                if len(coordinates) != 0:
+                    comment.reply(get_response(coordinates))
 
         for pm in pm_stream:
             if pm is None:
