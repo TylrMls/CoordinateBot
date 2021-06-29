@@ -25,9 +25,9 @@ def get_coordinates(msg):
         try:
             lat = float(convert_suffix(new_word, suffixes))
             long = float(convert_suffix(next_word, suffixes))
-            if not lat >= -90 and not lat <= 90:
+            if lat < -90 or lat > 90:
                 pass
-            elif not long >=-180 and not long <= 180:
+            elif lat < -180 or long > 180:
                 pass
             else:
                 coordinates.append([lat, long])
