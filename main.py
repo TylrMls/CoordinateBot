@@ -159,7 +159,7 @@ while True:
                         pm.reply("Successfully opted in! To opt back out, [click here]"
                                  "(https://www.reddit.com"
                                  "/message/compose/?to=CoordinateBot&subject=optout&message=!optout)!")
-    except (prawcore.exceptions.ServerError, prawcore.exceptions.RequestError) as e:
+    except (prawcore.exceptions.ServerError, prawcore.exceptions.RequestException) as e:
         print("Error occurred while making a request to Reddit server.")
         print(e)
         print("Resuming requests in 10 seconds...")
