@@ -164,3 +164,5 @@ while True:
         print(e)
         print("Resuming requests in 10 seconds...")
         time.sleep(10)
+	continue
+
