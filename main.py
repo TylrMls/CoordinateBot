@@ -1,4 +1,5 @@
 import os
+import sys
 import praw
 import prawcore
 import time
@@ -90,82 +91,88 @@ post_stream = subs.stream.submissions(pause_after=-1, skip_existing=True)
 mention_stream = praw.models.util.stream_generator(reddit.inbox.mentions, pause_after=-1, skip_existing=True)
 pm_stream = praw.models.util.stream_generator(reddit.inbox.messages, pause_after=-1, skip_existing=True)
 
+try:
+    while True:
+        try:
+            for post in post_stream:
+                if post is None:
+                    break
+                if post.author.id not in users_optout:
+                    print("Post ID: {id}, {title}".format(id=post, title=post.title))
+                    msg = post.title.split() + ["/"] + post.selftext.split()
+                    coordinates = coordhandler.get_coordinates(msg)
+                    post.save()
+                    if len(coordinates) != 0:
+                        post.reply(get_response(coordinates))
 
-while True:
-    try:
-        for post in post_stream:
-            if post is None:
-                break
-            if post.author.id not in users_optout:
-                print("Post ID: {id}, {title}".format(id=post, title=post.title))
-                msg = post.title.split() + ["/"] + post.selftext.split()
-                coordinates = coordhandler.get_coordinates(msg)
-                post.save()
-                if len(coordinates) != 0:
-                    post.reply(get_response(coordinates))
-
-        for comment in mention_stream:
-            if comment is None:
-                break
-            print("Comment ID: {id}, {message}".format(id=comment, message=comment.body))
-            parent = comment.parent()
-            msg = comment.body.split()
-            coordinates = coordhandler.get_coordinates(msg)
-            comment.save()
-            if len(coordinates) != 0:
-                comment.reply(get_response(coordinates))
-            elif type(parent) is praw.reddit.models.Submission and parent is not None:
-                print("Parent ID: {id}, {title}".format(id=parent, title=parent.title))
-                msg = parent.title.split() + ["/"] + parent.selftext.split()
+            for comment in mention_stream:
+                if comment is None:
+                    break
+                print("Comment ID: {id}, {message}".format(id=comment, message=comment.body))
+                parent = comment.parent()
+                msg = comment.body.split()
                 coordinates = coordhandler.get_coordinates(msg)
                 comment.save()
                 if len(coordinates) != 0:
                     comment.reply(get_response(coordinates))
-            elif type(parent) is praw.reddit.models.Comment and parent is not None:
-                print("Parent ID: {id}, {body}".format(id=parent, body=parent.body))
-                msg = parent.body.split()
-                coordinates = coordhandler.get_coordinates(msg)
-                comment.save()
-                if len(coordinates) != 0:
-                    comment.reply(get_response(coordinates))
+                elif type(parent) is praw.reddit.models.Submission and parent is not None:
+                    print("Parent ID: {id}, {title}".format(id=parent, title=parent.title))
+                    msg = parent.title.split() + ["/"] + parent.selftext.split()
+                    coordinates = coordhandler.get_coordinates(msg)
+                    comment.save()
+                    if len(coordinates) != 0:
+                        comment.reply(get_response(coordinates))
+                elif type(parent) is praw.reddit.models.Comment and parent is not None:
+                    print("Parent ID: {id}, {body}".format(id=parent, body=parent.body))
+                    msg = parent.body.split()
+                    coordinates = coordhandler.get_coordinates(msg)
+                    comment.save()
+                    if len(coordinates) != 0:
+                        comment.reply(get_response(coordinates))
 
-        for pm in pm_stream:
-            if pm is None:
-                break
-            if pm.subject == "optout" and pm.body == "!optout":
-                with open(config_file, "r") as infile:
-                    data = json.load(infile)
-                    if pm.author.id in data["users_optout"]:
-                        print("User {user} attempted to opt out but is already on the list!".format(user=pm.author.id))
-                    else:
-                        with open(config_file, "w") as outfile:
-                            data["users_optout"].append(pm.author.id)
-                            users_optout.append(pm.author.id)
-                            json.dump(data, outfile)
-                            pm.reply("Successfully opted out! To opt back in, [click here]"
+            for pm in pm_stream:
+                if pm is None:
+                    break
+                if pm.subject == "optout" and pm.body == "!optout":
+                    with open(config_file, "r") as infile:
+                        data = json.load(infile)
+                        if pm.author.id in data["users_optout"]:
+                            print("User {user} attempted to opt out but is already on the list!".format(user=pm.author.id))
+                        else:
+                            with open(config_file, "w") as outfile:
+                                data["users_optout"].append(pm.author.id)
+                                users_optout.append(pm.author.id)
+                                json.dump(data, outfile)
+                                pm.reply("Successfully opted out! To opt back in, [click here]"
+                                         "(https://www.reddit.com"
+                                         "/message/compose/?to=CoordinateBot&subject=optin&message=!optin)!")
+                if pm.subject == "optin" and pm.body == "!optin":
+                    with open(config_file, "r") as infile:
+                        data = json.load(infile)
+                        if pm.author.id not in data["users_optout"]:
+                            print("User {user} attempted to opt in but is not on the list!".format(user=pm.author))
+                        else:
+                            for index, user in enumerate(data["users_optout"]):
+                                if pm.author.id == user:
+                                    with open(config_file, "w") as outfile:
+                                        users_optout.pop(index)
+                                        data["users_optout"].pop(index)
+                                        json.dump(data, outfile)
+                            pm.reply("Successfully opted in! To opt back out, [click here]"
                                      "(https://www.reddit.com"
-                                     "/message/compose/?to=CoordinateBot&subject=optin&message=!optin)!")
-            if pm.subject == "optin" and pm.body == "!optin":
-                with open(config_file, "r") as infile:
-                    data = json.load(infile)
-                    if pm.author.id not in data["users_optout"]:
-                        print("User {user} attempted to opt in but is not on the list!".format(user=pm.author))
-                    else:
-                        for index, user in enumerate(data["users_optout"]):
-                            if pm.author.id == user:
-                                with open(config_file, "w") as outfile:
-                                    users_optout.pop(index)
-                                    data["users_optout"].pop(index)
-                                    json.dump(data, outfile)
-                        pm.reply("Successfully opted in! To opt back out, [click here]"
-                                 "(https://www.reddit.com"
-                                 "/message/compose/?to=CoordinateBot&subject=optout&message=!optout)!")
-    except (prawcore.exceptions.ServerError, prawcore.exceptions.RequestException) as e:
-        print("Error occurred while making a request to Reddit server.")
-        print(e)
-        print("Resuming requests in 10 seconds...")
-        time.sleep(10)
-        post_stream = subs.stream.submissions(pause_after=-1, skip_existing=True)
-        mention_stream = praw.models.util.stream_generator(reddit.inbox.mentions, pause_after=-1, skip_existing=True)
-        pm_stream = praw.models.util.stream_generator(reddit.inbox.messages, pause_after=-1, skip_existing=True)
-        print("Streams resumed!")
+                                     "/message/compose/?to=CoordinateBot&subject=optout&message=!optout)!")
+        except (prawcore.exceptions.ServerError, prawcore.exceptions.RequestException) as e:
+            print("Error occurred while making a request to Reddit server.")
+            print(e)
+            print("Resuming requests in 10 seconds...")
+            time.sleep(10)
+            post_stream = subs.stream.submissions(pause_after=-1, skip_existing=True)
+            mention_stream = praw.models.util.stream_generator(reddit.inbox.mentions, pause_after=-1, skip_existing=True)
+            pm_stream = praw.models.util.stream_generator(reddit.inbox.messages, pause_after=-1, skip_existing=True)
+            print("Streams resumed!")
+except KeyboardInterrupt:
+    print("Program interrupted!")
+    try:
+        sys.exit(0)
+    except SystemExit:
+        os._exit(0)
