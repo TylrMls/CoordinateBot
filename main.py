@@ -71,7 +71,7 @@ def get_response(coordinate_list):
     return ("I found some potential coordinates! Here are some links for them!  \n  \n"
             "{links}  \n"
             "---\n"
-            "[What is this?](https://github.com/TylrMls/CoordinateBot#coordinatebot) |"
+            "CoordinateBot V1.0 | [What is this?](https://github.com/TylrMls/CoordinateBot#coordinatebot) |"
             " [Subreddit](https://www.reddit.com/r/CoordinateBot/)  \n"
             "To opt out of my messages, [click here]"
             "(https://www.reddit.com/message/compose/"
@@ -86,10 +86,11 @@ def get_link(lat, long):
 
 get_subreddits()
 subs = reddit.subreddit(subreddits)
-
 post_stream = subs.stream.submissions(pause_after=-1, skip_existing=True)
 mention_stream = praw.models.util.stream_generator(reddit.inbox.mentions, pause_after=-1, skip_existing=True)
 pm_stream = praw.models.util.stream_generator(reddit.inbox.messages, pause_after=-1, skip_existing=True)
+
+
 while True:
     try:
         for post in post_stream:
@@ -164,4 +165,7 @@ while True:
         print(e)
         print("Resuming requests in 10 seconds...")
         time.sleep(10)
-        continue
+        post_stream = subs.stream.submissions(pause_after=-1, skip_existing=True)
+        mention_stream = praw.models.util.stream_generator(reddit.inbox.mentions, pause_after=-1, skip_existing=True)
+        pm_stream = praw.models.util.stream_generator(reddit.inbox.messages, pause_after=-1, skip_existing=True)
+        print("Streams resumed!")
