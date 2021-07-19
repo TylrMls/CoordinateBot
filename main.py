@@ -98,7 +98,7 @@ try:
                 if post is None:
                     break
                 if post.author.id not in users_optout:
-                    print("Post ID: {id}, {title}".format(id=post, title=post.title))
+                    print("Post ID: {id}, Sub: {sub}, {title}".format(id=post, sub=post.subreddit.display_name, title=post.title))
                     msg = post.title.split() + ["/"] + post.selftext.split()
                     coordinates = coordhandler.get_coordinates(msg)
                     post.save()
@@ -108,7 +108,7 @@ try:
             for comment in mention_stream:
                 if comment is None:
                     break
-                print("Comment ID: {id}, {message}".format(id=comment, message=comment.body))
+                print("Comment ID: {id}, Sub: {sub}, {message}".format(id=comment, sub=comment.subreddit.display_name, message=comment.body))
                 parent = comment.parent()
                 msg = comment.body.split()
                 coordinates = coordhandler.get_coordinates(msg)
