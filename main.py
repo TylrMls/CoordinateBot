@@ -163,7 +163,7 @@ try:
                                      "/message/compose/?to=CoordinateBot&subject=optout&message=!optout)!")
         except (prawcore.exceptions.ServerError,
                 prawcore.exceptions.RequestException,
-                prawcore.exceptions.RequestException) as e:
+                prawcore.exceptions.ResponseException) as e:
             print("Error occurred while making a request to Reddit server.")
             print(e)
             print("Resuming requests in 10 seconds...")
