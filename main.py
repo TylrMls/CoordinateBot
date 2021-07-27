@@ -98,7 +98,8 @@ try:
                 if post is None:
                     break
                 if post.author.id not in users_optout:
-                    print("Post ID: {id}, Sub: {sub}, {title}".format(id=post, sub=post.subreddit.display_name, title=post.title))
+                    print("Post ID: {id}, Sub: {sub}, {title}"
+                          .format(id=post, sub=post.subreddit.display_name, title=post.title))
                     msg = post.title.split() + ["/"] + post.selftext.split()
                     coordinates = coordhandler.get_coordinates(msg)
                     post.save()
@@ -108,7 +109,8 @@ try:
             for comment in mention_stream:
                 if comment is None:
                     break
-                print("Comment ID: {id}, Sub: {sub}, {message}".format(id=comment, sub=comment.subreddit.display_name, message=comment.body))
+                print("Comment ID: {id}, Sub: {sub}, {message}"
+                      .format(id=comment, sub=comment.subreddit.display_name, message=comment.body))
                 parent = comment.parent()
                 msg = comment.body.split()
                 coordinates = coordhandler.get_coordinates(msg)
@@ -137,7 +139,8 @@ try:
                     with open(config_file, "r") as infile:
                         data = json.load(infile)
                         if pm.author.id in data["users_optout"]:
-                            print("User {user} attempted to opt out but is already on the list!".format(user=pm.author.id))
+                            print("User {user} attempted to opt out but is already on the list!"
+                                  .format(user=pm.author.id))
                         else:
                             with open(config_file, "w") as outfile:
                                 data["users_optout"].append(pm.author.id)
@@ -170,8 +173,10 @@ try:
             print("Resuming requests in 10 seconds...")
             time.sleep(10)
             post_stream = subs.stream.submissions(pause_after=-1, skip_existing=True)
-            mention_stream = praw.models.util.stream_generator(reddit.inbox.mentions, pause_after=-1, skip_existing=True)
-            pm_stream = praw.models.util.stream_generator(reddit.inbox.messages, pause_after=-1, skip_existing=True)
+            mention_stream = \
+                praw.models.util.stream_generator(reddit.inbox.mentions, pause_after=-1, skip_existing=True)
+            pm_stream = \
+                praw.models.util.stream_generator(reddit.inbox.messages, pause_after=-1, skip_existing=True)
             print("Streams resumed!")
 except KeyboardInterrupt:
     print("Program interrupted!")
